@@ -1,5 +1,6 @@
 import random
 from data.quotes import quote_list
+from botocore.exceptions import ClientError
 
 
 def get_quote():
@@ -39,5 +40,8 @@ def get_parameter(ssm_client, parameter_name, **kwargs):
       message.
 
     """
-    # implement me
-    pass
+    try:
+        response = ssm_client.get_parameter(Name=parameter_name)
+        return response["Parameter"]["Value"]
+    except ClientError as error:
+        raise error
