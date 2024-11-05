@@ -20,17 +20,20 @@ def mock_s3(aws_credentials):
         yield boto3.client("s3")
 
 
+@pytest.fixture(scope="function")
+def mock_bucket(mock_s3):
+    mock_s3.create_bucket(
+        Bucket="test-bucket",
+        CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
+    )
+
+
 class TestWriteFileToS3:
-    def test_writes_file_to_s3(self, mock_s3):
+    def test_writes_file_to_s3(self, mock_s3, mock_bucket):
         # Arrange
         test_filepath = "./tests/sonnet18.txt"
         test_bucket = "test-bucket"
         test_key = "sonnet18.txt"
-
-        mock_s3.create_bucket(
-            Bucket=test_bucket,
-            CreateBucketConfiguration={"LocationConstraint": "eu-west-2"},
-        )
 
         expected = "File uploaded to bucket: test-bucket, on key: sonnet18.txt"
         # Act
@@ -39,3 +42,8 @@ class TestWriteFileToS3:
         # Act
         assert result == expected
         assert response["Contents"][0]["Key"] == test_key
+
+    # def test_returns_error_message_given_invalid_path_to_file(self, mock_s3):
+    #     # Arrange
+    #     # Act
+    #     # Assert
