@@ -25,6 +25,7 @@ def write_file_to_s3(s3_client, path_to_file, bucket_name, object_key, **kwargs)
     try:
         with open(path_to_file, "rb") as f:
             s3_client.put_object(Bucket=bucket_name, Key=object_key, Body=f)
+
         return f"File uploaded to bucket: {bucket_name}, on key: {object_key}"
     except FileNotFoundError as error:
         return f"No file found with path_to_file: {path_to_file}"
@@ -51,8 +52,23 @@ def read_file_from_s3(s3_client, bucket_name, object_key, destination, **kwargs)
       A string indicating success or an informative error message.
 
     """
-    # implement me
-    pass
+    try:
+        response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
+        content = response["Body"].read()
+
+        with open(destination, "wb") as f:
+            f.write(content)
+
+        return f"File saved to {destination}"
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "NoSuchBucket":
+            return f"""Error: {error.response["Error"]["Code"]}, Message: {error.response["Error"]["Message"]}"""
+        elif error.response["Error"]["Code"] == "NoSuchKey":
+            return f"""Error: {error.response["Error"]["Code"]}, Message: {error.response["Error"]["Message"]}"""
+        else:
+            raise error
+    except FileNotFoundError:
+        return f"Invalid destination: {destination}"
 
 
 if __name__ == "__main__":

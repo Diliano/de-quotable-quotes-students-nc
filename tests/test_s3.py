@@ -67,3 +67,68 @@ class TestWriteFileToS3:
             result
             == "Error: NoSuchBucket, Message: The specified bucket does not exist"
         )
+
+
+class TestReadFileFromS3:
+    def test_reads_file_from_s3(self, mock_s3, mock_bucket):
+        # Arrange
+        test_bucket_name = "test-bucket"
+        test_key = "test.txt"
+        test_content = b"This is unique content"
+        test_destination = "./tests/test_read.txt"
+
+        mock_s3.put_object(Bucket=test_bucket_name, Key=test_key, Body=test_content)
+        # Act
+        result = read_file_from_s3(
+            mock_s3, test_bucket_name, test_key, test_destination
+        )
+        # Assert
+        assert result == f"File saved to {test_destination}"
+
+        with open(test_destination, "rb") as f:
+            content = f.read()
+        assert content == test_content
+
+    def test_returns_error_message_given_invalid_bucket(self, mock_s3):
+        # Arrange
+        test_bucket_name = "not-a-real-bucket"
+        test_key = "test.txt"
+        test_destination = "./tests/test_read.txt"
+        # Act
+        result = read_file_from_s3(
+            mock_s3, test_bucket_name, test_key, test_destination
+        )
+        # Assert
+        assert (
+            result
+            == "Error: NoSuchBucket, Message: The specified bucket does not exist"
+        )
+
+    def test_returns_error_message_given_invalid_key(self, mock_s3, mock_bucket):
+        # Arrange
+        test_bucket_name = "test-bucket"
+        test_key = "not_a_real_file.txt"
+        test_destination = "./tests/test_read.txt"
+        # Act
+        result = read_file_from_s3(
+            mock_s3, test_bucket_name, test_key, test_destination
+        )
+        # Assert
+        assert result == "Error: NoSuchKey, Message: The specified key does not exist."
+
+    def test_returns_error_message_given_invalid_destination(
+        self, mock_s3, mock_bucket
+    ):
+        # Arrange
+        test_bucket_name = "test-bucket"
+        test_key = "test.txt"
+        test_content = b"This is unique content"
+        test_destination = "/not-a-real-folder/not_a_real_file.txt"
+
+        mock_s3.put_object(Bucket=test_bucket_name, Key=test_key, Body=test_content)
+        # Act
+        result = read_file_from_s3(
+            mock_s3, test_bucket_name, test_key, test_destination
+        )
+        # Assert
+        assert result == f"Invalid destination: {test_destination}"
