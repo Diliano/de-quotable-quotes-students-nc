@@ -62,7 +62,7 @@ class TestGetParameter:
         # Assert
         assert result == expected
 
-    def test_raises_error_given_invalid_param_name(self, mock_ssm):
+    def test_returns_descriptive_error_message_given_invalid_param_name(self, mock_ssm):
         # Arrange
         mock_ssm.put_parameter(
             Name="test_param", Value="I am a unique test parameter", Type="String"

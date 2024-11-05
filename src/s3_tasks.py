@@ -1,5 +1,6 @@
 from boto3 import client
 from src.helpers_tasks import get_parameter
+from botocore.exceptions import ClientError
 
 PARAMETER_NAME = "/temp/sprint/s3/bucket_name"
 
@@ -21,8 +22,17 @@ def write_file_to_s3(s3_client, path_to_file, bucket_name, object_key, **kwargs)
       A string indicating success or an informative error message.
 
     """
-    # implement me
-    pass
+    try:
+        with open(path_to_file, "rb") as f:
+            s3_client.put_object(Bucket=bucket_name, Key=object_key, Body=f)
+        return f"File uploaded to bucket: {bucket_name}, on key: {object_key}"
+    except FileNotFoundError as error:
+        return f"No file found with path_to_file: {path_to_file}"
+    except ClientError as error:
+        if error.response["Error"]["Code"] == "NoSuchBucket":
+            return f"""Error: {error.response["Error"]["Code"]}, Message: {error.response["Error"]["Message"]}"""
+        else:
+            raise error
 
 
 def read_file_from_s3(s3_client, bucket_name, object_key, destination, **kwargs):
