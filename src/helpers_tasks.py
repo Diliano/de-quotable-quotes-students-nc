@@ -44,4 +44,7 @@ def get_parameter(ssm_client, parameter_name, **kwargs):
         response = ssm_client.get_parameter(Name=parameter_name)
         return response["Parameter"]["Value"]
     except ClientError as error:
-        raise error
+        if error.response["Error"]["Code"] == "ParameterNotFound":
+            return f"""Error: {error.response["Error"]["Code"]}, Message: {error.response["Error"]["Message"]}"""
+        else:
+            raise error

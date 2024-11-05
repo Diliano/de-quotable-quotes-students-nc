@@ -67,11 +67,10 @@ class TestGetParameter:
         mock_ssm.put_parameter(
             Name="test_param", Value="I am a unique test parameter", Type="String"
         )
-        # Act + Assert
-        with pytest.raises(ClientError) as excinfo:
-            get_parameter(mock_ssm, "not_a_param")
-
+        # Act
+        result = get_parameter(mock_ssm, "not_a_param")
+        # Assert
         assert (
-            str(excinfo.value)
-            == "An error occurred (ParameterNotFound) when calling the GetParameter operation: Parameter not_a_param not found."
+            result
+            == "Error: ParameterNotFound, Message: Parameter not_a_param not found."
         )
