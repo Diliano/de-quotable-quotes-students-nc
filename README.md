@@ -1,3 +1,5 @@
-# The DE Quote Engine
+# Data Engineering Bootcamp - Boto3 & moto
 
-Instructions for today's sprint can be found at: <https://l2c.northcoders.com/courses/data-toolkit/quotable-quotes>
+## Overview
+
+This repository contains work completed as part of the Boto3 & moto Sprint during my Data Engineering Bootcamp. 
